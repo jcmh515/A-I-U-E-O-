@@ -97,11 +97,15 @@
             }
         });
 
+// 喇叭發音邏輯 (改良版：逐個音分開讀，中間加停頓)
         speakerBtn.addEventListener('click', () => {
             if (currentText) {
-                const utterance = new SpeechSynthesisUtterance(currentText);
+                // 將抽中嘅字拆開，中間加個逗號，逼系統停頓 (例如 "あ,い,う")
+                const spacedText = currentText.split('').join(', ');
+                
+                const utterance = new SpeechSynthesisUtterance(spacedText);
                 utterance.lang = 'ja-JP'; 
-                utterance.rate = 0.85; 
+                utterance.rate = 0.75; // 速度再稍微收慢少少
                 window.speechSynthesis.speak(utterance);
             }
         });
