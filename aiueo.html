@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <title>A I U E O 反射神經訓練器 (升級版)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f4f7f6; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        /* 稍微縮細啲字體，等10個音都可以一行顯示得晒 */
+        #display-area { font-size: 60px; font-weight: bold; margin: 40px 0; min-height: 100px; color: #2c3e50; letter-spacing: 8px; word-wrap: break-word; }
+        select, button { font-size: 20px; padding: 12px 24px; margin: 10px; cursor: pointer; border-radius: 8px; border: none; font-weight: bold; transition: 0.2s; }
+        select { border: 1px solid #ccc; background: white; }
+        #start-btn { background-color: #4CAF50; color: white; box-shadow: 0 4px #388E3C; }
+        #start-btn:active { transform: translateY(4px); box-shadow: 0 0 #388E3C; }
+        #start-btn.running { background-color: #f44336; box-shadow: 0 4px #d32f2f; }
+        #start-btn.running:active { transform: translateY(4px); box-shadow: 0 0 #d32f2f; }
+        #speaker-btn { background-color: #2196F3; color: white; box-shadow: 0 4px #1976D2; }
+        #speaker-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 #1976D2; }
+        #speaker-btn:disabled { background-color: #cccccc; color: #666; box-shadow: none; cursor: not-allowed; transform: none; }
+        #timer-display { font-size: 28px; color: #e67e22; margin-top: 20px; font-weight: bold; }
+        .controls { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🎯 五十音 (A I U E O) 極限挑戰</h2>
+        
+        <div class="controls">
+            <label for="char-count" style="font-size: 20px;">選擇難度 (字數)：</label>
+            <select id="char-count">
+                <option value="2">2 個音</option>
+                <option value="3">3 個音</option>
+                <option value="5" selected>5 個音</option>
+                <option value="7">7 個音</option>
+                <option value="10">10 個音 (地獄級)</option>
+                <option value="15">15 個音 (神級)</option>
+            </select>
+        </div>
+        
+        <div id="display-area">準備...</div>
+        
+        <button id="start-btn">▶️ 開始測試</button>
+        <button id="speaker-btn" disabled>🔊 聽 Google 正確發音</button>
+        
+        <div id="timer-display">時間: 0.00 秒</div>
+    </div>
+
+    <script>
+        const vowels = ['あ', 'い', 'う', 'え', 'お'];
+        let isRunning = false;
+        let startTime;
+        let timerInterval;
+        let currentText = '';
+
+        const displayArea = document.getElementById('display-area');
+        const startBtn = document.getElementById('start-btn');
+        const speakerBtn = document.getElementById('speaker-btn');
+        const timerDisplay = document.getElementById('timer-display');
+        const charCountSelect = document.getElementById('char-count');
+
+        function generateText(length) {
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * vowels.length);
+                result += vowels[randomIndex];
+            }
+            return result;
+        }
+
+        function updateTimer() {
+            const currentTime = new Date().getTime();
+            const elapsedTime = (currentTime - startTime) / 1000;
+            timerDisplay.textContent = `時間: ${elapsedTime.toFixed(2)} 秒`;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.textContent = '⏹️ 讀完！(停止計時)';
+                startBtn.classList.add('running');
+                speakerBtn.disabled = true; 
+                timerDisplay.style.color = '#333';
+                
+                const length = parseInt(charCountSelect.value);
+                currentText = generateText(length);
+                displayArea.textContent = currentText;
+                
+                startTime = new Date().getTime();
+                timerInterval = setInterval(updateTimer, 50); 
+            } else {
+                isRunning = false;
+                clearInterval(timerInterval);
+                startBtn.textContent = '🔄 再嚟一次 (開始)';
+                startBtn.classList.remove('running');
+                speakerBtn.disabled = false; 
+                timerDisplay.style.color = '#e67e22'; 
+            }
+        });
+
+        speakerBtn.addEventListener('click', () => {
+            if (currentText) {
+                const utterance = new SpeechSynthesisUtterance(currentText);
+                utterance.lang = 'ja-JP'; 
+                utterance.rate = 0.85; 
+                window.speechSynthesis.speak(utterance);
+            }
+        });
+    </script>
+</body>
+</html>
